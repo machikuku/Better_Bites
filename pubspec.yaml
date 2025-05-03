@@ -1,0 +1,99 @@
+# Project Metadata
+name: betterbitees  # Project name (used as package identifier)
+description: "A new Flutter project."
+publish_to: "none"  # Prevents accidental publishing to pub.dev
+
+# Application Versioning
+version: 1.0.0+1  # Format: <major>.<minor>.<patch>+<build>
+
+# Environment Configuration
+environment:
+  sdk: ^3.5.3  # Specifies Dart SDK version compatibility
+
+# Dependencies: Packages required for the app to function
+dependencies:
+  flutter:
+    sdk: flutter  # Core Flutter SDK
+    
+
+  # --- Image and Camera Handling ---
+  camera: ^0.11.0+2  # Camera plugin for capturing images
+  image_picker: ^1.1.2  # Select images from gallery or camera
+  path_provider: ^2.0.13  # Access filesystem directories (for storing images)
+  path: ^1.9.0  # Utility package for working with file paths
+  intl: ^0.20.2
+
+  # --- UI and Animation ---
+  flutter_svg: ^2.0.15  # Render SVG icons in UI
+  loading_animation_widget: ^1.3.0  # Display loading animations
+  animated_notch_bottom_bar: ^1.0.1  # Custom bottom navigation bar with a notch
+  flutter_expandable_fab: ^2.3.0  # Floating Action Button with expandable options
+  awesome_dialog: ^3.2.1  # Beautiful animated dialog widgets
+  typewritertext: ^3.0.9  # Animated text effects (typewriter effect)
+  panara_dialogs: ^0.1.5
+  
+
+  # --- State Management ---
+  flutter_riverpod: ^2.0.0  # State management library
+
+  # --- Machine Learning & OCR ---
+  google_mlkit_text_recognition: ^0.14.0  # ML Kit for extracting text from images
+
+  # --- Networking & API ---
+  http: ^1.2.2  # HTTP client for making API requests
+
+  # --- Database & Local Storage ---
+  sqflite: ^2.4.1  # SQLite database for local storage
+
+  # --- UI Components ---
+  cupertino_icons: ^1.0.8  # iOS-style icons
+  carousel_slider: ^5.0.0  # Image/text carousel widget
+  stacked_card_carousel: ^0.0.4  # Stacked card carousel for displaying history
+  google_ml_kit: ^0.19.0
+  lottie: ^3.2.0
+  showcaseview: ^2.0.3
+  shared_preferences: ^2.5.2
+  google_generative_ai: ^0.4.7
+
+# Development Dependencies (Used only during development and testing)
+dev_dependencies:
+  flutter_test:
+    sdk: flutter  # Testing framework
+  flutter_lints: ^5.0.0  # Linting rules for clean and maintainable code
+
+# Flutter-specific Configuration
+flutter:
+  uses-material-design: true  # Enables Material Design icons
+
+  # Asset files (images, SVGs) bundled with the app
+  assets:
+    - assets/bblogo.png  # App logo (not used in AfterScan)
+    - assets/blogo.png  # Used in AfterScan AppBar as the app logo
+    - assets/icons/like.svg  # Icon for "Suitable" tab in AfterScan
+    - assets/icons/allergen.svg  # Icon for "Allergens" tab in AfterScan
+    - assets/icons/unlike.svg  # Icon for "Unsuitable" tab in AfterScan
+    - assets/icons/lightbulb.svg  # Icon for "Health Tips" tab in AfterScan
+    - assets/icons/loading_animation.json
+
+  # Custom font configuration (Poppins)
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins/Poppins-Black.ttf
+        - asset: assets/fonts/Poppins/Poppins-BlackItalic.ttf
+        - asset: assets/fonts/Poppins/Poppins-Bold.ttf
+        - asset: assets/fonts/Poppins/Poppins-BoldItalic.ttf
+        - asset: assets/fonts/Poppins/Poppins-ExtraBold.ttf
+        - asset: assets/fonts/Poppins/Poppins-ExtraBoldItalic.ttf
+        - asset: assets/fonts/Poppins/Poppins-ExtraLight.ttf
+        - asset: assets/fonts/Poppins/Poppins-ExtraLightItalic.ttf
+        - asset: assets/fonts/Poppins/Poppins-Italic.ttf
+        - asset: assets/fonts/Poppins/Poppins-Light.ttf
+        - asset: assets/fonts/Poppins/Poppins-LightItalic.ttf
+        - asset: assets/fonts/Poppins/Poppins-Medium.ttf
+        - asset: assets/fonts/Poppins/Poppins-MediumItalic.ttf
+        - asset: assets/fonts/Poppins/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins/Poppins-SemiBold.ttf
+        - asset: assets/fonts/Poppins/Poppins-SemiBoldItalic.ttf
+        - asset: assets/fonts/Poppins/Poppins-Thin.ttf
+        - asset: assets/fonts/Poppins/Poppins-ThinItalic.ttf
