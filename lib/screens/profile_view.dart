@@ -169,18 +169,31 @@ class _ViewProfilingState extends State<ViewProfiling> {
                 const SizedBox(height: 24),
 
                 // Profile details in a grid layout
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  childAspectRatio: 2.5,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
+                Column(
                   children: [
-                    _buildProfileDetailTile('Age', '$age years', Icons.cake),
-                    _buildProfileDetailTile('Sex', sex.toString(), Icons.person),
-                    _buildProfileDetailTile('Height', '$height cm (${convertCmToFtIn(double.tryParse(height.toString()) ?? 0)})', Icons.height),
-                    _buildProfileDetailTile('Weight', '$weight kg (${convertKgToLbs(double.tryParse(weight.toString()) ?? 0)} lbs)', Icons.monitor_weight),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildProfileDetailTile('Age', '$age years', Icons.cake),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildProfileDetailTile('Sex', sex.toString(), Icons.person),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildProfileDetailTile('Height', '$height cm (${convertCmToFtIn(double.tryParse(height.toString()) ?? 0)})', Icons.height),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildProfileDetailTile('Weight', '$weight kg (${convertKgToLbs(double.tryParse(weight.toString()) ?? 0)} lbs)', Icons.monitor_weight),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
 
@@ -298,43 +311,47 @@ class _ViewProfilingState extends State<ViewProfiling> {
   }
 
   Widget _buildProfileDetailTile(String label, String value, IconData icon) {
+    const Color prime = Color(0xFF0d522c);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: prime),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 12,
-                    color: Colors.grey[600],
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: prime),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
                   ),
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: prime,
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: prime,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.visible,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -346,63 +363,84 @@ class _ViewProfilingState extends State<ViewProfiling> {
     double position = (bmi - minBmi) / (maxBmi - minBmi);
     position = position.clamp(0.0, 1.0);
 
-    return Container(
-      height: 24,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: const LinearGradient(
-          colors: [Colors.blue, Colors.green, Colors.orange, Colors.red],
-          stops: [0.2, 0.4, 0.6, 0.8],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: position * MediaQuery.of(context).size.width * 0.7,
-            top: 0,
-            bottom: 0,
-            child: Container(
-              width: 4,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
+    return Column(
+      children: [
+        Container(
+          height: 24,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: const LinearGradient(
+              colors: [Colors.blue, Colors.green, Colors.orange, Colors.red],
+              stops: [0.2, 0.4, 0.6, 0.8],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                left: position * MediaQuery.of(context).size.width * 0.7,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildBmiCategoryLabel('Underweight'),
-                _buildBmiCategoryLabel('Normal'),
-                _buildBmiCategoryLabel('Overweight'),
-                _buildBmiCategoryLabel('Obese'),
-              ],
-            ),
+        ),
+        const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildBmiCategoryLabel('Underweight'),
+              _buildBmiCategoryLabel('Normal'),
+              _buildBmiCategoryLabel('Overweight'),
+              _buildBmiCategoryLabel('Obese'),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildBmiCategoryLabel(String label) {
+    Color textColor;
+    switch (label) {
+      case 'Underweight':
+        textColor = Colors.blue;
+        break;
+      case 'Normal':
+        textColor = Colors.green;
+        break;
+      case 'Overweight':
+        textColor = Colors.orange;
+        break;
+      case 'Obese':
+        textColor = Colors.red;
+        break;
+      default:
+        textColor = Colors.black;
+    }
+    
     return Text(
       label,
-      style: const TextStyle(
+      style: TextStyle(
         fontFamily: 'Poppins',
-        fontSize: 8,
-        color: Colors.white,
+        fontSize: 10,
+        color: textColor,
         fontWeight: FontWeight.bold,
       ),
     );

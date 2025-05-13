@@ -14,7 +14,8 @@ class FoodAnalysisService {
 
   // IMPORTANT: Be careful with hardcoded API keys in production apps
   // This key will be visible in your app's binary and could be extracted
-  static const String _apiKey = "AIzaSyBomw7nWLyhb8uAPDhast7TtaLH-DSUw7Y"; // Replace with your actual API key
+  static const String _apiKey =
+      "AIzaSyBomw7nWLyhb8uAPDhast7TtaLH-DSUw7Y"; // Replace with your actual API key
   static const String _modelName = 'gemini-1.5-pro';
 
   FoodAnalysisService({
@@ -22,12 +23,16 @@ class FoodAnalysisService {
     required this.profilingRepo,
   });
 
+  /// Analyzes an image directly using the Gemini model.
+  /// - Detects if the image contains food.
+  /// - Extracts ingredient information and performs a detailed analysis.
+  /// - Saves the analysis to the database and invokes a callback with the result.
   Future<void> analyzeImageDirectly(
-      File imageFile,
-      Map<String, dynamic> userProfile,
-      Function(FoodAnalysis) onAnalysisComplete, {
-        DateTime? timestamp,
-      }) async {
+    File imageFile,
+    Map<String, dynamic> userProfile,
+    Function(FoodAnalysis) onAnalysisComplete, {
+    DateTime? timestamp,
+  }) async {
     try {
       debugPrint('Starting direct image analysis with Gemini...');
       debugPrint('User profile: $userProfile');
@@ -62,7 +67,9 @@ Respond ONLY with this JSON format and nothing else.
       // Create content parts for non-food detection
       final nonFoodImagePart = DataPart('image/jpeg', bytes);
       final nonFoodTextPart = TextPart(nonFoodDetectionPrompt);
-      final nonFoodContent = [Content.multi([nonFoodTextPart, nonFoodImagePart])];
+      final nonFoodContent = [
+        Content.multi([nonFoodTextPart, nonFoodImagePart])
+      ];
 
       // Check if the image contains food
       final nonFoodResponse = await model.generateContent(nonFoodContent);
@@ -89,14 +96,17 @@ Respond ONLY with this JSON format and nothing else.
               } else if (isFoodValue is String) {
                 isFood = isFoodValue.toLowerCase() == 'true';
               } else {
-                isFood = true; // Default to true if value is neither bool nor string
+                isFood =
+                    true; // Default to true if value is neither bool nor string
               }
             } else {
               isFood = true; // Default to true if key doesn't exist
             }
 
             if (!isFood) {
-              final String explanation = detectionResult['explanation'] as String? ?? 'This does not appear to be a food item';
+              final String explanation =
+                  detectionResult['explanation'] as String? ??
+                      'This does not appear to be a food item';
 
               // Create a special food analysis for non-food items
               final nonFoodAnalysis = FoodAnalysis(
@@ -105,15 +115,18 @@ Respond ONLY with this JSON format and nothing else.
                   IngredientAnalysis(
                     name: 'Error: Non-Food Item Detected',
                     impact: explanation,
-                    consumptionGuidance: 'This appears to be a non-food item. Please scan a food product with an ingredient label.',
-                    alternatives: 'Try scanning a packaged food item with an ingredient list.',
+                    consumptionGuidance:
+                        'This appears to be a non-food item. Please scan a food product with an ingredient label.',
+                    alternatives:
+                        'Try scanning a packaged food item with an ingredient list.',
                     source: 'Better Bites Analysis System',
                   )
                 ],
                 allergens: [
                   Allergen(
                     name: 'Not Applicable',
-                    description: 'No allergen information available for non-food items.',
+                    description:
+                        'No allergen information available for non-food items.',
                     impact: 'Not applicable as this is not a food item.',
                     source: 'Better Bites Analysis System',
                   )
@@ -121,8 +134,10 @@ Respond ONLY with this JSON format and nothing else.
                 healthTips: [
                   HealthTip(
                     name: 'Scan Food Items Only',
-                    description: 'Better Bites is designed to analyze food products and their ingredients.',
-                    suggestion: 'Please scan a food product with an ingredient label for accurate analysis.',
+                    description:
+                        'Better Bites is designed to analyze food products and their ingredients.',
+                    suggestion:
+                        'Please scan a food product with an ingredient label for accurate analysis.',
                     source: 'Better Bites Analysis System',
                   )
                 ],
@@ -131,7 +146,8 @@ Respond ONLY with this JSON format and nothing else.
 
               // Save to database
               final savedId = await foodAnalysisRepo.create(nonFoodAnalysis);
-              final savedAnalysis = await foodAnalysisRepo.getFoodAnalysis(savedId);
+              final savedAnalysis =
+                  await foodAnalysisRepo.getFoodAnalysis(savedId);
 
               onAnalysisComplete(savedAnalysis);
               return;
@@ -157,7 +173,8 @@ Respond ONLY with this JSON format and nothing else.
       } else if (healthConditionsData is String) {
         // If it's a comma-separated string, split it
         if (healthConditionsData.contains(',')) {
-          healthConditions = healthConditionsData.split(',').map((e) => e.trim()).toList();
+          healthConditions =
+              healthConditionsData.split(',').map((e) => e.trim()).toList();
         } else if (healthConditionsData.isNotEmpty) {
           // If it's a single condition as string
           healthConditions = [healthConditionsData];
@@ -237,7 +254,9 @@ IMPORTANT SOURCE REQUIREMENTS:
       // Create content parts with the image and prompt
       final imagePart = DataPart('image/jpeg', bytes);
       final textPart = TextPart(prompt);
-      final content = [Content.multi([textPart, imagePart])];
+      final content = [
+        Content.multi([textPart, imagePart])
+      ];
 
       // Generate content
       final response = await model.generateContent(content);
@@ -283,7 +302,8 @@ IMPORTANT SOURCE REQUIREMENTS:
             debugPrint('Food analysis saved with ID: $savedId');
 
             // Get the saved analysis with the ID
-            final savedAnalysis = await foodAnalysisRepo.getFoodAnalysis(savedId);
+            final savedAnalysis =
+                await foodAnalysisRepo.getFoodAnalysis(savedId);
 
             // Call the callback with the result
             onAnalysisComplete(savedAnalysis);
@@ -335,12 +355,12 @@ IMPORTANT SOURCE REQUIREMENTS:
   }
 
   Future<void> analyzeFood(
-      String ingredientText,
-      File imageFile,
-      Map<String, dynamic> userProfile,
-      Function(FoodAnalysis) onAnalysisComplete, {
-        DateTime? timestamp,
-      }) async {
+    String ingredientText,
+    File imageFile,
+    Map<String, dynamic> userProfile,
+    Function(FoodAnalysis) onAnalysisComplete, {
+    DateTime? timestamp,
+  }) async {
     try {
       debugPrint('Starting food analysis with Gemini...');
       debugPrint('User profile: $userProfile');
@@ -374,7 +394,9 @@ Respond ONLY with this JSON format and nothing else.
         final bytes = await imageFile.readAsBytes();
         final nonFoodImagePart = DataPart('image/jpeg', bytes);
         final nonFoodTextPart = TextPart(nonFoodDetectionPrompt);
-        final nonFoodContent = [Content.multi([nonFoodTextPart, nonFoodImagePart])];
+        final nonFoodContent = [
+          Content.multi([nonFoodTextPart, nonFoodImagePart])
+        ];
 
         // Check if the image contains food
         final nonFoodResponse = await model.generateContent(nonFoodContent);
@@ -401,14 +423,17 @@ Respond ONLY with this JSON format and nothing else.
                 } else if (isFoodValue is String) {
                   isFood = isFoodValue.toLowerCase() == 'true';
                 } else {
-                  isFood = true; // Default to true if value is neither bool nor string
+                  isFood =
+                      true; // Default to true if value is neither bool nor string
                 }
               } else {
                 isFood = true; // Default to true if key doesn't exist
               }
 
               if (!isFood) {
-                final String explanation = detectionResult['explanation'] as String? ?? 'This does not appear to be a food item';
+                final String explanation =
+                    detectionResult['explanation'] as String? ??
+                        'This does not appear to be a food item';
 
                 // Create a special food analysis for non-food items
                 final nonFoodAnalysis = FoodAnalysis(
@@ -417,15 +442,18 @@ Respond ONLY with this JSON format and nothing else.
                     IngredientAnalysis(
                       name: 'Error: Non-Food Item Detected',
                       impact: explanation,
-                      consumptionGuidance: 'This appears to be a non-food item. Please scan a food product with an ingredient label.',
-                      alternatives: 'Try scanning a packaged food item with an ingredient list.',
+                      consumptionGuidance:
+                          'This appears to be a non-food item. Please scan a food product with an ingredient label.',
+                      alternatives:
+                          'Try scanning a packaged food item with an ingredient list.',
                       source: 'Better Bites Analysis System',
                     )
                   ],
                   allergens: [
                     Allergen(
                       name: 'Not Applicable',
-                      description: 'No allergen information available for non-food items.',
+                      description:
+                          'No allergen information available for non-food items.',
                       impact: 'Not applicable as this is not a food item.',
                       source: 'Better Bites Analysis System',
                     )
@@ -433,8 +461,10 @@ Respond ONLY with this JSON format and nothing else.
                   healthTips: [
                     HealthTip(
                       name: 'Scan Food Items Only',
-                      description: 'Better Bites is designed to analyze food products and their ingredients.',
-                      suggestion: 'Please scan a food product with an ingredient label for accurate analysis.',
+                      description:
+                          'Better Bites is designed to analyze food products and their ingredients.',
+                      suggestion:
+                          'Please scan a food product with an ingredient label for accurate analysis.',
                       source: 'Better Bites Analysis System',
                     )
                   ],
@@ -443,7 +473,8 @@ Respond ONLY with this JSON format and nothing else.
 
                 // Save to database
                 final savedId = await foodAnalysisRepo.create(nonFoodAnalysis);
-                final savedAnalysis = await foodAnalysisRepo.getFoodAnalysis(savedId);
+                final savedAnalysis =
+                    await foodAnalysisRepo.getFoodAnalysis(savedId);
 
                 onAnalysisComplete(savedAnalysis);
                 return;
@@ -473,7 +504,8 @@ Respond ONLY with this JSON format and nothing else.
       } else if (healthConditionsData is String) {
         // If it's a comma-separated string, split it
         if (healthConditionsData.contains(',')) {
-          healthConditions = healthConditionsData.split(',').map((e) => e.trim()).toList();
+          healthConditions =
+              healthConditionsData.split(',').map((e) => e.trim()).toList();
         } else if (healthConditionsData.isNotEmpty) {
           // If it's a single condition as string
           healthConditions = [healthConditionsData];
@@ -557,7 +589,9 @@ IMPORTANT SOURCE REQUIREMENTS:
       // Create content parts with the image and prompt
       final imagePart = DataPart('image/jpeg', bytes);
       final textPart = TextPart(prompt);
-      final content = [Content.multi([textPart, imagePart])];
+      final content = [
+        Content.multi([textPart, imagePart])
+      ];
 
       // Generate content
       final response = await model.generateContent(content);
@@ -590,7 +624,8 @@ IMPORTANT SOURCE REQUIREMENTS:
             debugPrint('Food analysis saved with ID: $savedId');
 
             // Get the saved analysis with the ID
-            final savedAnalysis = await foodAnalysisRepo.getFoodAnalysis(savedId);
+            final savedAnalysis =
+                await foodAnalysisRepo.getFoodAnalysis(savedId);
 
             // Call the callback with the result
             onAnalysisComplete(savedAnalysis);
@@ -643,12 +678,12 @@ IMPORTANT SOURCE REQUIREMENTS:
 
   // Update the reanalyzeFood method to better handle missing OCR text and preserve original food identity
   Future<FoodAnalysis> reanalyzeFood(
-      String ingredientText,
-      Map<String, dynamic> currentUserProfile,
-      DateTime timestamp, {
-        String? originalTitle,
-        File? imageFile,
-      }) async {
+    String ingredientText,
+    Map<String, dynamic> currentUserProfile,
+    DateTime timestamp, {
+    String? originalTitle,
+    File? imageFile,
+  }) async {
     try {
       debugPrint('Starting food reanalysis with Gemini...');
       debugPrint('Current user profile: $currentUserProfile');
@@ -670,7 +705,8 @@ IMPORTANT SOURCE REQUIREMENTS:
       } else if (healthConditionsData is String) {
         // If it's a comma-separated string, split it
         if (healthConditionsData.contains(',')) {
-          healthConditions = healthConditionsData.split(',').map((e) => e.trim()).toList();
+          healthConditions =
+              healthConditionsData.split(',').map((e) => e.trim()).toList();
         } else if (healthConditionsData.isNotEmpty) {
           // If it's a single condition as string
           healthConditions = [healthConditionsData];
@@ -685,7 +721,8 @@ IMPORTANT SOURCE REQUIREMENTS:
       if (imageFile != null && await imageFile.exists()) {
         final bytes = await imageFile.readAsBytes();
         final appDir = await getApplicationDocumentsDirectory();
-        final fileName = '${DateTime.now().millisecondsSinceEpoch}_reanalysis.jpg';
+        final fileName =
+            '${DateTime.now().millisecondsSinceEpoch}_reanalysis.jpg';
         savedImagePath = path.join(appDir.path, fileName);
         await File(savedImagePath).writeAsBytes(bytes);
         debugPrint('Saved image for reanalysis: $savedImagePath');
@@ -781,7 +818,9 @@ ${originalTitle != null ? '\n\nCRITICAL: Your analysis MUST be about "$originalT
         final bytes = await imageFile.readAsBytes();
         final imagePart = DataPart('image/jpeg', bytes);
         final textPart = TextPart(prompt);
-        content = [Content.multi([textPart, imagePart])];
+        content = [
+          Content.multi([textPart, imagePart])
+        ];
         debugPrint('Using image for reanalysis');
       } else {
         content = [Content.text(prompt)];
@@ -807,7 +846,9 @@ ${originalTitle != null ? '\n\nCRITICAL: Your analysis MUST be about "$originalT
             // Ensure the title contains the original title if provided
             if (originalTitle != null && jsonData.containsKey('title')) {
               final String currentTitle = jsonData['title'] as String;
-              if (!currentTitle.toLowerCase().contains(originalTitle.toLowerCase())) {
+              if (!currentTitle
+                  .toLowerCase()
+                  .contains(originalTitle.toLowerCase())) {
                 jsonData['title'] = '$originalTitle (Reanalyzed)';
               }
             }
@@ -826,7 +867,8 @@ ${originalTitle != null ? '\n\nCRITICAL: Your analysis MUST be about "$originalT
             debugPrint('Food reanalysis saved with ID: $savedId');
 
             // Get the saved analysis with the ID
-            final savedAnalysis = await foodAnalysisRepo.getFoodAnalysis(savedId);
+            final savedAnalysis =
+                await foodAnalysisRepo.getFoodAnalysis(savedId);
             return savedAnalysis;
           } else {
             throw Exception('Could not extract JSON from response');
@@ -876,7 +918,8 @@ ${originalTitle != null ? '\n\nCRITICAL: Your analysis MUST be about "$originalT
   }
 
   // Method to generate allergen impact using Gemini
-  Future<String> _generateAllergenImpactWithGemini(String allergenName, Map<String, dynamic> userProfile) async {
+  Future<String> _generateAllergenImpactWithGemini(
+      String allergenName, Map<String, dynamic> userProfile) async {
     try {
       // Extract health conditions from user profile - handle both string and list formats
       List<String> healthConditions = [];
@@ -886,7 +929,8 @@ ${originalTitle != null ? '\n\nCRITICAL: Your analysis MUST be about "$originalT
       } else if (healthConditionsData is String) {
         // If it's a comma-separated string, split it
         if (healthConditionsData.contains(',')) {
-          healthConditions = healthConditionsData.split(',').map((e) => e.trim()).toList();
+          healthConditions =
+              healthConditionsData.split(',').map((e) => e.trim()).toList();
         } else if (healthConditionsData.isNotEmpty) {
           // If it's a single condition as string
           healthConditions = [healthConditionsData];
@@ -941,7 +985,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
   }
 
   // Fallback method for generating basic allergen impact
-  String _generateBasicAllergenImpact(String allergenName, Map<String, dynamic>? userProfile) {
+  String _generateBasicAllergenImpact(
+      String allergenName, Map<String, dynamic>? userProfile) {
     // Extract health conditions if available
     List<String> healthConditions = [];
     if (userProfile != null && userProfile['health_conditions'] != null) {
@@ -951,7 +996,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       } else if (healthConditionsData is String) {
         // If it's a comma-separated string, split it
         if (healthConditionsData.contains(',')) {
-          healthConditions = healthConditionsData.split(',').map((e) => e.trim()).toList();
+          healthConditions =
+              healthConditionsData.split(',').map((e) => e.trim()).toList();
         } else if (healthConditionsData.isNotEmpty) {
           // If it's a single condition as string
           healthConditions = [healthConditionsData];
@@ -966,7 +1012,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
         userProfile['height'] != null &&
         userProfile['weight'] != null) {
       try {
-        double height = double.parse(userProfile['height'].toString()) / 100; // cm to m
+        double height =
+            double.parse(userProfile['height'].toString()) / 100; // cm to m
         double weight = double.parse(userProfile['weight'].toString());
         bmi = weight / (height * height);
 
@@ -1006,7 +1053,7 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
     // Check for common allergens and provide specific impacts
     if (normalizedName.contains('gluten') || normalizedName.contains('wheat')) {
       if (healthConditions.any((condition) =>
-      condition.toLowerCase().contains('celiac') ||
+          condition.toLowerCase().contains('celiac') ||
           condition.toLowerCase().contains('gluten'))) {
         return 'Gluten can trigger severe autoimmune responses in people with celiac disease, causing intestinal damage and nutrient malabsorption. Caution: This allergen should be strictly avoided.';
       }
@@ -1021,7 +1068,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
     if (normalizedName.contains('dairy') ||
         normalizedName.contains('milk') ||
         normalizedName.contains('lactose')) {
-      if (healthConditions.any((condition) => condition.toLowerCase().contains('lactose'))) {
+      if (healthConditions
+          .any((condition) => condition.toLowerCase().contains('lactose'))) {
         return 'Dairy products contain lactose which cannot be properly digested by people with lactose intolerance, leading to digestive discomfort, bloating, and diarrhea. Caution: This allergen should be avoided or consumed with lactase supplements.';
       }
 
@@ -1044,9 +1092,10 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
     }
 
     if (normalizedName.contains('soy')) {
-      if (sex == 'female' && healthConditions.any((condition) =>
-      condition.toLowerCase().contains('thyroid') ||
-          condition.toLowerCase().contains('hormone'))) {
+      if (sex == 'female' &&
+          healthConditions.any((condition) =>
+              condition.toLowerCase().contains('thyroid') ||
+              condition.toLowerCase().contains('hormone'))) {
         return 'Soy allergies can cause skin reactions, digestive issues, and in rare cases, anaphylaxis. Caution: Soy contains phytoestrogens that may interact with hormonal conditions. Consider limiting consumption, especially with your specific health profile.';
       }
 
@@ -1065,7 +1114,7 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
         normalizedName.contains('shellfish') ||
         normalizedName.contains('seafood')) {
       if (healthConditions.any((condition) =>
-      condition.toLowerCase().contains('heart') ||
+          condition.toLowerCase().contains('heart') ||
           condition.toLowerCase().contains('cholesterol'))) {
         return 'Seafood allergies are often severe and can cause rapid-onset symptoms including skin reactions, digestive issues, and potentially life-threatening anaphylaxis. Warning: While seafood can be heart-healthy for many people, it must be avoided completely if you have a known seafood allergy.';
       }
@@ -1073,9 +1122,10 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       return 'Seafood allergies are often severe and can cause rapid-onset symptoms including skin reactions, digestive issues, and potentially life-threatening anaphylaxis. Warning: Avoid completely if you have a known seafood allergy.';
     }
 
-    if (normalizedName.contains('sulfite') || normalizedName.contains('sulphite')) {
+    if (normalizedName.contains('sulfite') ||
+        normalizedName.contains('sulphite')) {
       if (healthConditions.any((condition) =>
-      condition.toLowerCase().contains('asthma') ||
+          condition.toLowerCase().contains('asthma') ||
           condition.toLowerCase().contains('respiratory'))) {
         return 'Sulfites can trigger asthma attacks and other respiratory symptoms in sensitive individuals, particularly with your respiratory condition. Caution: This additive should be strictly avoided given your health profile.';
       }
@@ -1098,12 +1148,12 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
 
   // Update the _createFoodAnalysisFromJson method to include volume in the name field
   Future<FoodAnalysis> _createFoodAnalysisFromJson(
-      Map<String, dynamic> jsonData,
-      String imagePath,
-      String recognizedText,
-      DateTime timestamp,
-      Map<String, dynamic>? userProfile,
-      ) async {
+    Map<String, dynamic> jsonData,
+    String imagePath,
+    String recognizedText,
+    DateTime timestamp,
+    Map<String, dynamic>? userProfile,
+  ) async {
     // Helper to calculate BMI and BMI category
     String bmiCategory = '';
     double? bmi;
@@ -1111,7 +1161,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
         userProfile['height'] != null &&
         userProfile['weight'] != null) {
       try {
-        double height = double.parse(userProfile['height'].toString()) / 100; // cm to m
+        double height =
+            double.parse(userProfile['height'].toString()) / 100; // cm to m
         double weight = double.parse(userProfile['weight'].toString());
         bmi = weight / (height * height);
 
@@ -1153,7 +1204,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
         healthConditions = List<String>.from(healthConditionsData);
       } else if (healthConditionsData is String) {
         if (healthConditionsData.contains(',')) {
-          healthConditions = healthConditionsData.split(',').map((e) => e.trim()).toList();
+          healthConditions =
+              healthConditionsData.split(',').map((e) => e.trim()).toList();
         } else if (healthConditionsData.isNotEmpty) {
           healthConditions = [healthConditionsData];
         }
@@ -1161,8 +1213,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
     }
 
     // Parse ingredients analysis
-    final ingredientsAnalysisList = (jsonData['ingredients_analysis'] as List<dynamic>? ?? [])
-        .map((item) {
+    final ingredientsAnalysisList =
+        (jsonData['ingredients_analysis'] as List<dynamic>? ?? []).map((item) {
       // Extract name and volume from JSON
       final String baseName = item['name'] ?? 'Unknown Ingredient';
       final String? volume = item['volume']?.toString();
@@ -1176,7 +1228,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       final String normalizedName = baseName.toLowerCase();
 
       // Get the original consumption guidance or provide a default
-      String originalGuidance = item['consumption_guidance'] ?? 'Consume in moderation as part of a balanced diet.';
+      String originalGuidance = item['consumption_guidance'] ??
+          'Consume in moderation as part of a balanced diet.';
 
       // Initialize the consumption guidance with the original guidance
       String consumptionGuidance = originalGuidance;
@@ -1185,7 +1238,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       double? volumeValue;
       String? unit;
       if (volume != null && volume != 'N/A') {
-        final volumeMatch = RegExp(r'(\d*\.?\d+)\s*(g|mg|ml|%)').firstMatch(volume);
+        final volumeMatch =
+            RegExp(r'(\d*\.?\d+)\s*(g|mg|ml|%)').firstMatch(volume);
         if (volumeMatch != null) {
           volumeValue = double.tryParse(volumeMatch.group(1) ?? '');
           unit = volumeMatch.group(2);
@@ -1193,59 +1247,84 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       }
 
       // Tailor consumption guidance based on ingredient, volume, and user profile
-      if (normalizedName.contains('sugar') || normalizedName.contains('high fructose corn syrup')) {
+      if (normalizedName.contains('sugar') ||
+          normalizedName.contains('high fructose corn syrup')) {
         if (volumeValue != null && unit == 'g') {
           // WHO recommends less than 50g of added sugars per day (10% of 2000 calories), ideally below 25g
           if (volumeValue > 25) {
-            consumptionGuidance = 'This contains $volume of added sugars, exceeding the WHO ideal limit of 25g per day. Limit intake to less than one serving daily.';
+            consumptionGuidance =
+                'This contains $volume of added sugars, exceeding the WHO ideal limit of 25g per day. Limit intake to less than one serving daily.';
           } else if (volumeValue > 10) {
-            consumptionGuidance = 'This contains $volume of added sugars, approaching the WHO ideal limit of 25g per day. Limit to 1-2 servings daily to stay within recommendations.';
+            consumptionGuidance =
+                'This contains $volume of added sugars, approaching the WHO ideal limit of 25g per day. Limit to 1-2 servings daily to stay within recommendations.';
           } else {
-            consumptionGuidance = 'This contains $volume of added sugars, which is moderate. You can consume up to 2-3 servings daily while staying within WHO guidelines of 25-50g per day.';
+            consumptionGuidance =
+                'This contains $volume of added sugars, which is moderate. You can consume up to 2-3 servings daily while staying within WHO guidelines of 25-50g per day.';
           }
 
           // Adjust based on user profile
           if (bmiCategory == 'overweight' || bmiCategory == 'obese') {
-            consumptionGuidance += ' Given your weight, further reduce intake to support weight management.';
-          } else if (healthConditions.any((condition) => condition.toLowerCase().contains('diabetes'))) {
-            consumptionGuidance += ' With diabetes, strictly limit to less than 1 serving daily to manage blood sugar levels.';
+            consumptionGuidance +=
+                ' Given your weight, further reduce intake to support weight management.';
+          } else if (healthConditions.any(
+              (condition) => condition.toLowerCase().contains('diabetes'))) {
+            consumptionGuidance +=
+                ' With diabetes, strictly limit to less than 1 serving daily to manage blood sugar levels.';
           }
         } else {
-          consumptionGuidance = 'Added sugars should be limited to less than 10% of daily calories (about 50g for a 2000-calorie diet). Consume sparingly, ideally less than 1 serving daily.';
+          consumptionGuidance =
+              'Added sugars should be limited to less than 10% of daily calories (about 50g for a 2000-calorie diet). Consume sparingly, ideally less than 1 serving daily.';
           if (bmiCategory == 'overweight' || bmiCategory == 'obese') {
-            consumptionGuidance += ' Given your weight, prefer minimal intake to support weight management.';
+            consumptionGuidance +=
+                ' Given your weight, prefer minimal intake to support weight management.';
           }
         }
-      } else if (normalizedName.contains('trans fat') || normalizedName.contains('partially hydrogenated')) {
+      } else if (normalizedName.contains('trans fat') ||
+          normalizedName.contains('partially hydrogenated')) {
         // WHO recommends trans fats be less than 1% of total energy intake (<2g for 2000 calories)
         if (volumeValue != null && unit == 'g') {
           if (volumeValue > 0) {
-            consumptionGuidance = 'This contains $volume of trans fats, which should be avoided as even small amounts are harmful. Do not consume this product.';
+            consumptionGuidance =
+                'This contains $volume of trans fats, which should be avoided as even small amounts are harmful. Do not consume this product.';
           }
         } else {
-          consumptionGuidance = 'Trans fats should be avoided entirely due to their harmful effects on heart health. Do not consume products containing trans fats.';
+          consumptionGuidance =
+              'Trans fats should be avoided entirely due to their harmful effects on heart health. Do not consume products containing trans fats.';
         }
-        if (healthConditions.any((condition) => condition.toLowerCase().contains('heart') || condition.toLowerCase().contains('cholesterol'))) {
-          consumptionGuidance += ' With your heart condition, it’s critical to avoid trans fats completely.';
+        if (healthConditions.any((condition) =>
+            condition.toLowerCase().contains('heart') ||
+            condition.toLowerCase().contains('cholesterol'))) {
+          consumptionGuidance +=
+              ' With your heart condition, it’s critical to avoid trans fats completely.';
         }
-      } else if (normalizedName.contains('sodium') || normalizedName.contains('salt')) {
+      } else if (normalizedName.contains('sodium') ||
+          normalizedName.contains('salt')) {
         // WHO recommends less than 2000mg of sodium per day
         if (volumeValue != null && unit == 'mg') {
           if (volumeValue > 1000) {
-            consumptionGuidance = 'This contains $volume of sodium, over half the WHO daily limit of 2000mg. Limit to less than 1 serving daily.';
+            consumptionGuidance =
+                'This contains $volume of sodium, over half the WHO daily limit of 2000mg. Limit to less than 1 serving daily.';
           } else if (volumeValue > 400) {
-            consumptionGuidance = 'This contains $volume of sodium, a significant amount. Limit to 1-2 servings daily to stay within the WHO guideline of 2000mg.';
+            consumptionGuidance =
+                'This contains $volume of sodium, a significant amount. Limit to 1-2 servings daily to stay within the WHO guideline of 2000mg.';
           } else {
-            consumptionGuidance = 'This contains $volume of sodium, which is moderate. You can consume 2-3 servings daily while staying within WHO guidelines.';
+            consumptionGuidance =
+                'This contains $volume of sodium, which is moderate. You can consume 2-3 servings daily while staying within WHO guidelines.';
           }
 
-          if (healthConditions.any((condition) => condition.toLowerCase().contains('hypertension') || condition.toLowerCase().contains('heart'))) {
-            consumptionGuidance += ' With your condition, aim for less than 1500mg daily, so reduce intake further.';
+          if (healthConditions.any((condition) =>
+              condition.toLowerCase().contains('hypertension') ||
+              condition.toLowerCase().contains('heart'))) {
+            consumptionGuidance +=
+                ' With your condition, aim for less than 1500mg daily, so reduce intake further.';
           }
         } else {
-          consumptionGuidance = 'Sodium should be limited to less than 2000mg per day. Consume sparingly, ideally less than 2 servings daily.';
-          if (healthConditions.any((condition) => condition.toLowerCase().contains('hypertension'))) {
-            consumptionGuidance += ' With hypertension, aim for less than 1500mg daily, so limit to 1 serving.';
+          consumptionGuidance =
+              'Sodium should be limited to less than 2000mg per day. Consume sparingly, ideally less than 2 servings daily.';
+          if (healthConditions.any((condition) =>
+              condition.toLowerCase().contains('hypertension'))) {
+            consumptionGuidance +=
+                ' With hypertension, aim for less than 1500mg daily, so limit to 1 serving.';
           }
         }
       } else if (normalizedName.contains('protein')) {
@@ -1262,40 +1341,54 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
 
         if (volumeValue != null && unit == 'g' && dailyProteinNeed != null) {
           double servingsToMeetHalf = (dailyProteinNeed / 2) / volumeValue;
-          consumptionGuidance = 'This contains $volume of protein, beneficial for muscle health. Consume about ${servingsToMeetHalf.toStringAsFixed(1)} servings to meet roughly half your daily need of ${dailyProteinNeed.toStringAsFixed(1)}g.';
+          consumptionGuidance =
+              'This contains $volume of protein, beneficial for muscle health. Consume about ${servingsToMeetHalf.toStringAsFixed(1)} servings to meet roughly half your daily need of ${dailyProteinNeed.toStringAsFixed(1)}g.';
           if (sex == 'male') {
-            consumptionGuidance += ' As a male, you may benefit from slightly higher protein intake (up to 1.2g/kg) for muscle maintenance.';
+            consumptionGuidance +=
+                ' As a male, you may benefit from slightly higher protein intake (up to 1.2g/kg) for muscle maintenance.';
           } else if (bmiCategory == 'underweight') {
-            consumptionGuidance += ' Given your underweight status, increase intake to support healthy weight gain.';
+            consumptionGuidance +=
+                ' Given your underweight status, increase intake to support healthy weight gain.';
           }
         } else {
-          consumptionGuidance = 'Protein is essential for muscle health; aim for 0.8g per kg of body weight daily. Include 1-2 servings of protein-rich foods in your meals.';
+          consumptionGuidance =
+              'Protein is essential for muscle health; aim for 0.8g per kg of body weight daily. Include 1-2 servings of protein-rich foods in your meals.';
         }
       } else if (normalizedName.contains('calcium')) {
         // Recommended calcium intake: 1000mg per day for adults, 1200mg for women over 50 and men over 70
-        int dailyCalciumNeed = (sex == 'female' && age != null && age > 50) || (sex == 'male' && age != null && age > 70) ? 1200 : 1000;
+        int dailyCalciumNeed = (sex == 'female' && age != null && age > 50) ||
+                (sex == 'male' && age != null && age > 70)
+            ? 1200
+            : 1000;
 
         if (volumeValue != null && unit == 'mg') {
           double servingsForHalf = (dailyCalciumNeed / 2) / volumeValue;
-          consumptionGuidance = 'This contains $volume of calcium, important for bone health. Consume about ${servingsForHalf.toStringAsFixed(1)} servings to meet roughly half your daily need of ${dailyCalciumNeed}mg.';
+          consumptionGuidance =
+              'This contains $volume of calcium, important for bone health. Consume about ${servingsForHalf.toStringAsFixed(1)} servings to meet roughly half your daily need of ${dailyCalciumNeed}mg.';
           if (sex == 'female') {
-            consumptionGuidance += ' As a female, ensure adequate calcium intake to support bone health, especially if over 50.';
+            consumptionGuidance +=
+                ' As a female, ensure adequate calcium intake to support bone health, especially if over 50.';
           }
         } else {
-          consumptionGuidance = 'Calcium is vital for bone health; aim for 1000-1200mg daily. Include 1-2 servings of calcium-rich foods in your diet.';
+          consumptionGuidance =
+              'Calcium is vital for bone health; aim for 1000-1200mg daily. Include 1-2 servings of calcium-rich foods in your diet.';
         }
       } else if (normalizedName.contains('iron')) {
         // Recommended iron intake: 8mg for men, 18mg for women (19-50 years), 8mg for women over 50
-        int dailyIronNeed = (sex == 'female' && age != null && age >= 19 && age <= 50) ? 18 : 8;
+        int dailyIronNeed =
+            (sex == 'female' && age != null && age >= 19 && age <= 50) ? 18 : 8;
 
         if (volumeValue != null && unit == 'mg') {
           double servingsForHalf = (dailyIronNeed / 2) / volumeValue;
-          consumptionGuidance = 'This contains $volume of iron, crucial for blood health. Consume about ${servingsForHalf.toStringAsFixed(1)} servings to meet roughly half your daily need of ${dailyIronNeed}mg.';
+          consumptionGuidance =
+              'This contains $volume of iron, crucial for blood health. Consume about ${servingsForHalf.toStringAsFixed(1)} servings to meet roughly half your daily need of ${dailyIronNeed}mg.';
           if (sex == 'female' && age != null && age <= 50) {
-            consumptionGuidance += ' As a female under 50, your iron needs are higher due to menstruation.';
+            consumptionGuidance +=
+                ' As a female under 50, your iron needs are higher due to menstruation.';
           }
         } else {
-          consumptionGuidance = 'Iron is essential for blood health; aim for 8-18mg daily depending on age and sex. Include 1-2 servings of iron-rich foods in your diet.';
+          consumptionGuidance =
+              'Iron is essential for blood health; aim for 8-18mg daily depending on age and sex. Include 1-2 servings of iron-rich foods in your diet.';
         }
       } else if (normalizedName.contains('fiber')) {
         // Recommended fiber intake: 25g for women, 38g for men
@@ -1303,51 +1396,71 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
 
         if (volumeValue != null && unit == 'g') {
           double servingsForHalf = (dailyFiberNeed / 2) / volumeValue;
-          consumptionGuidance = 'This contains $volume of fiber, beneficial for digestion. Consume about ${servingsForHalf.toStringAsFixed(1)} servings to meet roughly half your daily need of ${dailyFiberNeed}g.';
+          consumptionGuidance =
+              'This contains $volume of fiber, beneficial for digestion. Consume about ${servingsForHalf.toStringAsFixed(1)} servings to meet roughly half your daily need of ${dailyFiberNeed}g.';
           if (bmiCategory == 'overweight' || bmiCategory == 'obese') {
-            consumptionGuidance += ' Given your weight, increasing fiber intake can aid in weight management.';
+            consumptionGuidance +=
+                ' Given your weight, increasing fiber intake can aid in weight management.';
           }
         } else {
-          consumptionGuidance = 'Fiber supports digestion; aim for 25-38g daily depending on sex. Include 1-2 servings of fiber-rich foods in your meals.';
+          consumptionGuidance =
+              'Fiber supports digestion; aim for 25-38g daily depending on sex. Include 1-2 servings of fiber-rich foods in your meals.';
         }
-      } else if (normalizedName.contains('msg') || normalizedName.contains('monosodium glutamate')) {
-        if (healthConditions.any((condition) => condition.toLowerCase().contains('migraine') || condition.toLowerCase().contains('headache'))) {
-          consumptionGuidance = 'MSG may trigger migraines in sensitive individuals. Avoid consumption, especially with your condition.';
+      } else if (normalizedName.contains('msg') ||
+          normalizedName.contains('monosodium glutamate')) {
+        if (healthConditions.any((condition) =>
+            condition.toLowerCase().contains('migraine') ||
+            condition.toLowerCase().contains('headache'))) {
+          consumptionGuidance =
+              'MSG may trigger migraines in sensitive individuals. Avoid consumption, especially with your condition.';
         } else {
-          consumptionGuidance = 'MSG may cause reactions in sensitive individuals; limit to less than 1 serving daily and monitor for symptoms like headaches.';
+          consumptionGuidance =
+              'MSG may cause reactions in sensitive individuals; limit to less than 1 serving daily and monitor for symptoms like headaches.';
         }
-      } else if (normalizedName.contains('artificial') && (normalizedName.contains('color') || normalizedName.contains('flavor'))) {
-        consumptionGuidance = 'Artificial colors/flavors may cause hyperactivity or allergic reactions. Limit to less than 1 serving daily, especially for children or those with sensitivities.';
+      } else if (normalizedName.contains('artificial') &&
+          (normalizedName.contains('color') ||
+              normalizedName.contains('flavor'))) {
+        consumptionGuidance =
+            'Artificial colors/flavors may cause hyperactivity or allergic reactions. Limit to less than 1 serving daily, especially for children or those with sensitivities.';
         if (age != null && age < 18) {
-          consumptionGuidance += ' As a younger individual, minimize intake to reduce potential behavioral impacts.';
+          consumptionGuidance +=
+              ' As a younger individual, minimize intake to reduce potential behavioral impacts.';
         }
       } else {
         // Generic guidance if specific ingredient isn't matched
         if (volume != null && volume != 'N/A') {
-          consumptionGuidance = '$originalGuidance A serving containing $volume can be consumed 1-2 times daily as part of a balanced diet.';
+          consumptionGuidance =
+              '$originalGuidance A serving containing $volume can be consumed 1-2 times daily as part of a balanced diet.';
         } else {
-          consumptionGuidance = '$originalGuidance Generally, consume 1-2 servings daily as part of a balanced diet.';
+          consumptionGuidance =
+              '$originalGuidance Generally, consume 1-2 servings daily as part of a balanced diet.';
         }
       }
 
       return IngredientAnalysis(
         name: displayName,
-        impact: item['impact'] ?? 'This ingredient has no specific known health impacts based on current nutritional research.',
+        impact: item['impact'] ??
+            'This ingredient has no specific known health impacts based on current nutritional research.',
         consumptionGuidance: consumptionGuidance,
-        alternatives: item['alternatives'] ?? 'No specific alternatives identified for this ingredient.',
-        source: item['source'] != null && item['source'] != '' ? item['source'] : 'Not provided by analysis system',
+        alternatives: item['alternatives'] ??
+            'No specific alternatives identified for this ingredient.',
+        source: item['source'] != null && item['source'] != ''
+            ? item['source']
+            : 'Not provided by analysis system',
       );
-    })
-        .toList();
+    }).toList();
 
     // If no ingredients were found, add a default one
     if (ingredientsAnalysisList.isEmpty) {
       ingredientsAnalysisList.add(
         IngredientAnalysis(
           name: 'Ingredients Not Identified',
-          impact: 'Unable to determine specific health impacts without identified ingredients.',
-          consumptionGuidance: 'Consider consulting the product packaging or manufacturer for detailed ingredient information. Generally, limit to 1 serving until more information is available.',
-          alternatives: 'Consider whole foods with clearly labeled ingredients as alternatives.',
+          impact:
+              'Unable to determine specific health impacts without identified ingredients.',
+          consumptionGuidance:
+              'Consider consulting the product packaging or manufacturer for detailed ingredient information. Generally, limit to 1 serving until more information is available.',
+          alternatives:
+              'Consider whole foods with clearly labeled ingredients as alternatives.',
           source: 'Not provided by analysis system',
         ),
       );
@@ -1356,9 +1469,12 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       ingredientsAnalysisList.add(
         IngredientAnalysis(
           name: 'Added Sugars',
-          impact: 'Added sugars provide empty calories and can contribute to weight gain, inflammation, and increased risk of chronic diseases. Warning: Excessive consumption should be avoided.',
-          consumptionGuidance: 'Limit consumption of added sugars to less than 10% of daily caloric intake, ideally under 25g per day. Consume less than 1 serving daily.',
-          alternatives: 'Natural sweeteners like stevia, monk fruit, or small amounts of honey or maple syrup can be used as alternatives.',
+          impact:
+              'Added sugars provide empty calories and can contribute to weight gain, inflammation, and increased risk of chronic diseases. Warning: Excessive consumption should be avoided.',
+          consumptionGuidance:
+              'Limit consumption of added sugars to less than 10% of daily caloric intake, ideally under 25g per day. Consume less than 1 serving daily.',
+          alternatives:
+              'Natural sweeteners like stevia, monk fruit, or small amounts of honey or maple syrup can be used as alternatives.',
           source: 'American Heart Association Dietary Guidelines',
         ),
       );
@@ -1366,10 +1482,14 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       ingredientsAnalysisList.add(
         IngredientAnalysis(
           name: 'Artificial Preservatives',
-          impact: 'Artificial preservatives may cause allergic reactions and have been linked to hyperactivity in some individuals. Caution: These additives should be limited in your diet.',
-          consumptionGuidance: 'Minimize consumption of foods with artificial preservatives to less than 1 serving daily, especially if you have sensitivities.',
-          alternatives: 'Look for products preserved with natural ingredients like vitamin E, rosemary extract, or citric acid.',
-          source: 'Center for Science in the Public Interest Food Additives Database',
+          impact:
+              'Artificial preservatives may cause allergic reactions and have been linked to hyperactivity in some individuals. Caution: These additives should be limited in your diet.',
+          consumptionGuidance:
+              'Minimize consumption of foods with artificial preservatives to less than 1 serving daily, especially if you have sensitivities.',
+          alternatives:
+              'Look for products preserved with natural ingredients like vitamin E, rosemary extract, or citric acid.',
+          source:
+              'Center for Science in the Public Interest Food Additives Database',
         ),
       );
     }
@@ -1380,18 +1500,23 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
     // Process each allergen
     for (var item in (jsonData['allergens'] as List<dynamic>? ?? [])) {
       final allergenName = item['name'] ?? 'Unknown Allergen';
-      final allergenDescription = item['description'] ?? 'This is a potential allergen found in the product.';
+      final allergenDescription = item['description'] ??
+          'This is a potential allergen found in the product.';
 
       // Check if the impact is missing or generic
       String allergenImpact = item['impact'] ?? '';
-      if (allergenImpact.isEmpty || allergenImpact == 'May cause adverse reactions in sensitive individuals.') {
+      if (allergenImpact.isEmpty ||
+          allergenImpact ==
+              'May cause adverse reactions in sensitive individuals.') {
         // Generate impact using Gemini if possible
         if (userProfile != null) {
           try {
-            allergenImpact = await _generateAllergenImpactWithGemini(allergenName, userProfile);
+            allergenImpact = await _generateAllergenImpactWithGemini(
+                allergenName, userProfile);
           } catch (e) {
             debugPrint('Error generating allergen impact: $e');
-            allergenImpact = _generateBasicAllergenImpact(allergenName, userProfile);
+            allergenImpact =
+                _generateBasicAllergenImpact(allergenName, userProfile);
           }
         } else {
           allergenImpact = _generateBasicAllergenImpact(allergenName, null);
@@ -1402,8 +1527,11 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
         name: allergenName,
         description: allergenDescription,
         impact: allergenImpact,
-        potentialReaction: item['potential_reaction'] ?? 'Reactions vary by individual. Consult a healthcare professional if you have known allergies.',
-        source: item['source'] != null && item['source'] != '' ? item['source'] : 'Not provided by analysis system',
+        potentialReaction: item['potential_reaction'] ??
+            'Reactions vary by individual. Consult a healthcare professional if you have known allergies.',
+        source: item['source'] != null && item['source'] != ''
+            ? item['source']
+            : 'Not provided by analysis system',
       ));
     }
 
@@ -1412,9 +1540,12 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       allergensList.add(
         Allergen(
           name: 'Allergens Not Identified',
-          description: 'No specific allergens were identified in the provided information.',
-          impact: 'Without identified allergens, we cannot determine specific health impacts.',
-          potentialReaction: 'If you have known allergies, please check the product packaging or contact the manufacturer for detailed allergen information.',
+          description:
+              'No specific allergens were identified in the provided information.',
+          impact:
+              'Without identified allergens, we cannot determine specific health impacts.',
+          potentialReaction:
+              'If you have known allergies, please check the product packaging or contact the manufacturer for detailed allergen information.',
           source: 'Not provided by analysis system',
         ),
       );
@@ -1423,9 +1554,12 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       allergensList.add(
         Allergen(
           name: 'Potential Gluten',
-          description: 'Gluten is a protein found in wheat, barley, and rye that can cause adverse reactions in sensitive individuals.',
-          impact: 'Gluten can trigger digestive issues, inflammation, and autoimmune responses in sensitive individuals. Caution: Those with celiac disease or gluten sensitivity should avoid gluten-containing products.',
-          potentialReaction: 'Reactions to gluten can include digestive discomfort, bloating, diarrhea, fatigue, and in celiac disease, intestinal damage.',
+          description:
+              'Gluten is a protein found in wheat, barley, and rye that can cause adverse reactions in sensitive individuals.',
+          impact:
+              'Gluten can trigger digestive issues, inflammation, and autoimmune responses in sensitive individuals. Caution: Those with celiac disease or gluten sensitivity should avoid gluten-containing products.',
+          potentialReaction:
+              'Reactions to gluten can include digestive discomfort, bloating, diarrhea, fatigue, and in celiac disease, intestinal damage.',
           source: 'Celiac Disease Foundation',
         ),
       );
@@ -1433,9 +1567,12 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       allergensList.add(
         Allergen(
           name: 'Potential Dairy',
-          description: 'Dairy products contain proteins and lactose that can cause adverse reactions in sensitive individuals.',
-          impact: 'Dairy can cause digestive issues, inflammation, and allergic reactions in sensitive individuals. Warning: Those with lactose intolerance or milk allergies should limit or avoid dairy products.',
-          potentialReaction: 'Reactions to dairy can include digestive discomfort, bloating, diarrhea, skin rashes, and respiratory symptoms.',
+          description:
+              'Dairy products contain proteins and lactose that can cause adverse reactions in sensitive individuals.',
+          impact:
+              'Dairy can cause digestive issues, inflammation, and allergic reactions in sensitive individuals. Warning: Those with lactose intolerance or milk allergies should limit or avoid dairy products.',
+          potentialReaction:
+              'Reactions to dairy can include digestive discomfort, bloating, diarrhea, skin rashes, and respiratory symptoms.',
           source: 'American Academy of Allergy, Asthma & Immunology',
         ),
       );
@@ -1444,11 +1581,15 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
     // Parse health tips
     final healthTipsList = (jsonData['health_tips'] as List<dynamic>? ?? [])
         .map((item) => HealthTip(
-      name: item['name'] ?? 'Health Tip',
-      description: item['description'] ?? 'No detailed description available for this health tip.',
-      suggestion: item['suggestion'] ?? 'Consider consulting with a healthcare professional for personalized nutrition advice.',
-      source: item['source'] != null && item['source'] != '' ? item['source'] : 'Not provided by analysis system',
-    ))
+              name: item['name'] ?? 'Health Tip',
+              description: item['description'] ??
+                  'No detailed description available for this health tip.',
+              suggestion: item['suggestion'] ??
+                  'Consider consulting with a healthcare professional for personalized nutrition advice.',
+              source: item['source'] != null && item['source'] != ''
+                  ? item['source']
+                  : 'Not provided by analysis system',
+            ))
         .toList();
 
     // If no health tips were found, add a default one
@@ -1456,8 +1597,10 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       healthTipsList.add(
         HealthTip(
           name: 'General Nutrition Advice',
-          description: 'A balanced diet is essential for overall health and wellbeing.',
-          suggestion: 'Focus on whole foods, plenty of fruits and vegetables, lean proteins, and whole grains.',
+          description:
+              'A balanced diet is essential for overall health and wellbeing.',
+          suggestion:
+              'Focus on whole foods, plenty of fruits and vegetables, lean proteins, and whole grains.',
           source: 'Dietary Guidelines for Americans 2020-2025',
         ),
       );
@@ -1466,8 +1609,10 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       healthTipsList.add(
         HealthTip(
           name: 'Read Food Labels',
-          description: 'Understanding food labels helps you make informed choices about the products you consume.',
-          suggestion: 'Look for products with shorter ingredient lists and fewer artificial additives.',
+          description:
+              'Understanding food labels helps you make informed choices about the products you consume.',
+          suggestion:
+              'Look for products with shorter ingredient lists and fewer artificial additives.',
           source: 'FDA Food Labeling Guide',
         ),
       );
@@ -1475,8 +1620,10 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       healthTipsList.add(
         HealthTip(
           name: 'Portion Control',
-          description: 'Controlling portion sizes helps maintain a healthy weight and prevents overeating.',
-          suggestion: 'Use smaller plates, measure servings, and listen to your body\'s hunger and fullness cues.',
+          description:
+              'Controlling portion sizes helps maintain a healthy weight and prevents overeating.',
+          suggestion:
+              'Use smaller plates, measure servings, and listen to your body\'s hunger and fullness cues.',
           source: 'Academy of Nutrition and Dietetics',
         ),
       );
@@ -1494,13 +1641,13 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
   }
 
   FoodAnalysis _createFallbackFoodAnalysis(
-      String imagePath,
-      String recognizedText,
-      DateTime timestamp,
-      Map<String, dynamic>? userProfile, {
-        String? originalTitle,
-        bool hasRealData = false,
-      }) {
+    String imagePath,
+    String recognizedText,
+    DateTime timestamp,
+    Map<String, dynamic>? userProfile, {
+    String? originalTitle,
+    bool hasRealData = false,
+  }) {
     // Extract health conditions if available
     final List<String> healthConditions = userProfile != null
         ? List<String>.from(userProfile['health_conditions'] ?? [])
@@ -1512,7 +1659,8 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
         userProfile['height'] != null &&
         userProfile['weight'] != null) {
       try {
-        double height = double.parse(userProfile['height'].toString()) / 100; // cm to m
+        double height =
+            double.parse(userProfile['height'].toString()) / 100; // cm to m
         double weight = double.parse(userProfile['weight'].toString());
         double bmi = weight / (height * height);
 
@@ -1533,13 +1681,18 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
     // Create more personalized fallback content if we have user profile
     String healthConditionText = '';
     if (healthConditions.isNotEmpty) {
-      healthConditionText = 'Based on your health conditions (${healthConditions.join(", ")}), ';
+      healthConditionText =
+          'Based on your health conditions (${healthConditions.join(", ")}), ';
     }
 
     // Use original title if provided, but don't add error suffix if we have real data
     final title = originalTitle != null
-        ? hasRealData ? originalTitle : '$originalTitle (Reanalysis Error)'
-        : hasRealData ? 'Ingredient Analysis' : 'Ingredient Analysis (Processing Error)';
+        ? hasRealData
+            ? originalTitle
+            : '$originalTitle (Reanalysis Error)'
+        : hasRealData
+            ? 'Ingredient Analysis'
+            : 'Ingredient Analysis (Processing Error)';
 
     return FoodAnalysis(
       title: title,
@@ -1548,24 +1701,33 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
       ingredientsAnalysis: [
         IngredientAnalysis(
           name: 'Analysis Failed',
-          impact: 'We encountered an error analyzing the ingredients. Please try again or contact support.',
-          consumptionGuidance: '${bmiText}${healthConditionText}please consult with a healthcare professional for guidance on this product. Limit to 1 serving until more information is available.',
-          alternatives: 'Consider products with clearly labeled ingredients or whole foods as alternatives.',
+          impact:
+              'We encountered an error analyzing the ingredients. Please try again or contact support.',
+          consumptionGuidance:
+              '${bmiText}${healthConditionText}please consult with a healthcare professional for guidance on this product. Limit to 1 serving until more information is available.',
+          alternatives:
+              'Consider products with clearly labeled ingredients or whole foods as alternatives.',
           source: 'Not provided by analysis system',
         ),
         IngredientAnalysis(
           name: 'Unknown Ingredients',
-          impact: 'Without proper analysis, we cannot determine the health impact of this product.',
-          consumptionGuidance: '${bmiText}${healthConditionText}exercise caution when consuming products with unknown ingredients. Limit to 1 serving daily until more information is available.',
-          alternatives: 'Look for similar products with transparent ingredient labeling.',
+          impact:
+              'Without proper analysis, we cannot determine the health impact of this product.',
+          consumptionGuidance:
+              '${bmiText}${healthConditionText}exercise caution when consuming products with unknown ingredients. Limit to 1 serving daily until more information is available.',
+          alternatives:
+              'Look for similar products with transparent ingredient labeling.',
           source: 'Not provided by analysis system',
         ),
         // Add an ingredient with concerning health impact to ensure we have data for that tab
         IngredientAnalysis(
           name: 'Processed Food Additives',
-          impact: 'Processed foods often contain additives that may have negative health effects. Warning: These should be limited in your diet.',
-          consumptionGuidance: '${bmiText}${healthConditionText}limit consumption of highly processed foods with numerous additives to less than 1 serving daily.',
-          alternatives: 'Choose whole, minimally processed foods whenever possible.',
+          impact:
+              'Processed foods often contain additives that may have negative health effects. Warning: These should be limited in your diet.',
+          consumptionGuidance:
+              '${bmiText}${healthConditionText}limit consumption of highly processed foods with numerous additives to less than 1 serving daily.',
+          alternatives:
+              'Choose whole, minimally processed foods whenever possible.',
           source: 'Not provided by analysis system',
         ),
       ],
@@ -1573,15 +1735,20 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
         Allergen(
           name: 'Unknown Allergens',
           description: 'Could not analyze allergens due to processing error.',
-          impact: '${bmiText}${healthConditionText}without proper analysis, we cannot determine the health impact of potential allergens in this product. Caution: Exercise care if you have known allergies.',
-          potentialReaction: 'Please exercise caution if you have known allergies. Check the product packaging for allergen information.',
+          impact:
+              '${bmiText}${healthConditionText}without proper analysis, we cannot determine the health impact of potential allergens in this product. Caution: Exercise care if you have known allergies.',
+          potentialReaction:
+              'Please exercise caution if you have known allergies. Check the product packaging for allergen information.',
           source: 'Not provided by analysis system',
         ),
         Allergen(
           name: 'Common Food Allergens',
-          description: 'Common food allergens include nuts, dairy, eggs, wheat, soy, fish, and shellfish.',
-          impact: '${bmiText}${healthConditionText}food allergens can cause mild to severe health effects in sensitive individuals, with reactions varying based on the specific allergen and individual sensitivity. Warning: Avoid known allergens.',
-          potentialReaction: 'Allergic reactions can range from mild (itching, hives) to severe (difficulty breathing, anaphylaxis). If you have known allergies, always check ingredient labels carefully.',
+          description:
+              'Common food allergens include nuts, dairy, eggs, wheat, soy, fish, and shellfish.',
+          impact:
+              '${bmiText}${healthConditionText}food allergens can cause mild to severe health effects in sensitive individuals, with reactions varying based on the specific allergen and individual sensitivity. Warning: Avoid known allergens.',
+          potentialReaction:
+              'Allergic reactions can range from mild (itching, hives) to severe (difficulty breathing, anaphylaxis). If you have known allergies, always check ingredient labels carefully.',
           source: 'World Allergy Organization Guidelines',
         ),
       ],
@@ -1589,13 +1756,16 @@ RESPOND WITH THE IMPACT DESCRIPTION TEXT ONLY, NO ADDITIONAL FORMATTING OR EXPLA
         HealthTip(
           name: 'Error Processing',
           description: 'We encountered an error analyzing this food item.',
-          suggestion: 'Please try scanning again or contact support for assistance.',
+          suggestion:
+              'Please try scanning again or contact support for assistance.',
           source: 'Dietary Guidelines for Americans 2020-2025',
         ),
         HealthTip(
           name: 'Read Labels Carefully',
-          description: '${bmiText}${healthConditionText}always read food labels carefully, especially if you have dietary restrictions or health conditions.',
-          suggestion: 'Look for clear ingredient lists and nutrition facts when choosing food products.',
+          description:
+              '${bmiText}${healthConditionText}always read food labels carefully, especially if you have dietary restrictions or health conditions.',
+          suggestion:
+              'Look for clear ingredient lists and nutrition facts when choosing food products.',
           source: 'Dietary Guidelines for Americans 2020-2025',
         ),
       ],
